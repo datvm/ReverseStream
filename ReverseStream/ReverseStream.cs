@@ -6,11 +6,16 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ReverseStream
+namespace System.IO
 {
 
     public class ReverseStream : Stream
     {
+
+        public ReverseStream(Stream underlyingStream)
+        {
+            this.UnderlyingStream = underlyingStream;
+        }
 
         public Stream UnderlyingStream { get; private set; }
 
@@ -28,7 +33,7 @@ namespace ReverseStream
         {
             get
             {
-                return this.UnderlyingStream.Length - this.Position;
+                return this.GetUnderlyingPosition(this.Position);
             }
         }
 
@@ -39,7 +44,16 @@ namespace ReverseStream
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            this.UnderlyingStream.Seek(this.UnderlyingPosition, SeekOrigin.Begin);
+            var to = Math.Min(this.UnderlyingStream.Length, this.GetUnderlyingPosition(this.Position));
+            var from = Math.Max(0, this.GetUnderlyingPosition(this.Position + count - 1));
+
+            if (to < from)
+            {
+                return 0;
+            }
+
+            count = (int)(to - from + 1);
+            this.UnderlyingStream.Seek(from, SeekOrigin.Begin);
 
             var reverseBuffer = new byte[count];
             var byteReadCount = this.UnderlyingStream.Read(reverseBuffer, 0, count);
@@ -49,7 +63,18 @@ namespace ReverseStream
                 buffer[offset + i] = reverseBuffer[byteReadCount - i - 1];
             }
 
+            this.Position += byteReadCount;
             return byteReadCount;
+        }
+
+        public long GetUnderlyingPosition(long position)
+        {
+            if (position < 0)
+            {
+                throw new IndexOutOfRangeException();
+            }
+
+            return this.UnderlyingStream.Length - position - 1;
         }
 
         public override long Seek(long offset, SeekOrigin origin)
@@ -80,6 +105,8 @@ namespace ReverseStream
 
         public override void Write(byte[] buffer, int offset, int count)
         {
+
+
             this.UnderlyingStream.Seek(this.UnderlyingPosition, SeekOrigin.Begin);
 
             var writing = new byte[count];
