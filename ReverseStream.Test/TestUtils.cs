@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -29,6 +30,45 @@ namespace ReverseStream.Test
         }
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+    }
+
+    public class TestStream : Stream
+    {
+
+        public bool CanReadField { get; set; } = true;
+        public bool CanSeekField { get; set; } = true;
+        public bool CanWriteField { get; set; } = true;
+        public long LengthField { get; set; } = 0;
+
+        public override bool CanRead {  get => this.CanReadField; }
+
+        public override bool CanSeek { get => this.CanSeekField; }
+
+        public override bool CanWrite { get => this.CanWriteField; }
+
+        public override long Length { get => this.LengthField; }
+
+        public override long Position { get; set; }
+
+        public override void Flush() { }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            return count;
+        }
+
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            return offset;
+        }
+
+        public override void SetLength(long value)
+        {
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+        }
     }
 
 }

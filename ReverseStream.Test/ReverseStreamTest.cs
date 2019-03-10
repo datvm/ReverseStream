@@ -11,6 +11,31 @@ namespace ReverseStream.Test
     public class ReverseStreamTest
     {
 
+        [Fact]
+        public void ShouldCheckContracts()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                new System.IO.ReverseStream(null);
+            });
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                new System.IO.ReverseStream(new TestStream()
+                {
+                    CanSeekField = false,
+                });
+            });
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                new System.IO.ReverseStream(new TestStream()
+                {
+                    CanReadField = false,
+                });
+            });
+        }
+
         [Theory]
         [ClassData(typeof(TestDataClass))]
         public void ShouldHaveReversedResult(byte[] input, byte[] expectedReverse, byte[] _)
@@ -57,7 +82,7 @@ namespace ReverseStream.Test
                             expectedReverse.Take(i + segmentLength),
                             output.Take(i + segmentLength));
                     }
-                    
+
                     byteCount = reverseStream.Read(output, 0, int.MaxValue);
                     Assert.Equal(0, byteCount);
                 }

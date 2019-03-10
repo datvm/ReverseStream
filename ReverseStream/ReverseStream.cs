@@ -1,5 +1,7 @@
-﻿using System;
+﻿using LukeVo.UtilityStream;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,6 +16,8 @@ namespace System.IO
 
         public ReverseStream(Stream underlyingStream)
         {
+            StreamUtils.CheckSeekableUnderlyingStream(underlyingStream);
+
             this.UnderlyingStream = underlyingStream;
         }
 
@@ -21,7 +25,7 @@ namespace System.IO
 
         public override bool CanRead => true;
 
-        public override bool CanSeek => this.UnderlyingStream.CanSeek;
+        public override bool CanSeek => true;
 
         public override bool CanWrite => false;
 
